@@ -6,7 +6,6 @@ import cv2
 import cv2 as cv
 import PIL
 from PIL import Image
-from PIL import rot
 from PIL import ImageEnhance
 from PIL import ImageFilter
 import random
@@ -16,17 +15,21 @@ from scipy.ndimage import rotate
 from scipy.ndimage import zoom
 
 
-def Rotation(img, gt, path):
-    low = 1;
+def rotation(img, gt):
+    low = 1
     high = 359
-    degree = random(low, high)
+    degree = random.randint(low, high)
+    img = Image.open(img)
+    gt = Image.open(gt)
     rotation_img = rotate(img, degree, reshape=False)
     rotation_gt = rotate(gt, degree, reshape=False)
 
     return rotation_img, rotation_gt
 
 
-def zoom(img, gt, zoom_coeff,path, **kwargs):
+def zoom(img, gt, zoom_coeff,  **kwargs):
+    img = Image.open(img)
+    gt = Image.open(gt)
     h, w = img.shape[:2]
     h1, w1 = gt.shape[:2]
     zoom_tuple = (zoom_coeff,) * 2 + (1,) * (img.ndim - 2)
@@ -75,7 +78,9 @@ def zoom(img, gt, zoom_coeff,path, **kwargs):
     return out, out1
 
 
-def transpose(img, gt, path):
+def transpose(img, gt):
+    img = cv.imread(img)
+    gt = cv.imread(gt)
     vertical_flip = img.transpose(method=Image.FLIP_TOP_BOTTOM)
     horizontal_flip = img.transpose(method=Image.FLIP_LEFT_RIGHT)
     vertical_flip_gt = gt.transpose(method=Image.FLIP_TOP_BOTTOM)
@@ -104,18 +109,23 @@ def hue(img, saturation):
     cv.imwrite(path + 'saturation' + str(saturation) + Extension, img)
 
 
-def bright_img(img, path):
-    file_path = path + img
-    img = Image.open('' % file_path)
-    ImageEnhance.Brightness(img).enhance(1.5).save(path + '' % img.translate(None, '.png') + '.png', "PNG")
+def bright_img(img):
+    img = Image.open(img)
+    ench = ImageEnhance.Brightness(img).enhance(1.5)
+    #   ImageEnhance.Brightness(img).enhance(1.5).save(path + '' % img.translate(None, '.png') + '.png', "PNG")
+    return ench
 
 
-def blr_img(img, path):
-    file_path = path + img
-    img = Image.open('%s' % file_path)
-    img.filter(ImageFilter.BLUR).save(path + '' % img.translate(None, '.png') + '.png', "PNG")
+def blr_img(img):
+    # file_path = path + img
+    img = Image.open(img)
+    BLR = img.filter(ImageFilter.BLUR)
+    #  img.filter(ImageFilter.BLUR).save(path + '' % img.translate(None, '.png') + '.png', "PNG")
+    return BLR
 
-def contrant_enh_img(img, path):
-    file_path = path + img
-    img = Image.open('%s'%file_path)
-    ImageEnhance.Contrast(img).enhance(0.8).save(path)
+
+def contrast_enh_img(img):
+    img = Image.open(img)
+    CE = ImageEnhance.Contrast(img).enhance(0.8)
+    # ImageEnhance.Contrast(img).enhance(0.8).save(path)
+    return CE
